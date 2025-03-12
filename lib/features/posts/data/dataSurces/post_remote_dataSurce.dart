@@ -1,46 +1,66 @@
 import 'dart:convert';
-
-import 'package:dartz/dartz.dart';
 import 'package:flutter_application_1/Core/Errors/Exeptions.dart';
-import 'package:flutter_application_1/features/posts/data/models/post_model.dart';
+
+import '../models/post_model.dart';
+import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
 
-abstract class PostRemoteDatasurce {
-  Future<List<PostModel>> getAllposts();
+abstract class PostRemoteDataSource {
+  Future<List<PostModel>> getAllPosts();
   Future<Unit> deletePost(int postId);
-  Future<Unit> updatepost(PostModel postModel);
-  Future<Unit> addpost(PostModel postModel);
+  Future<Unit> updatePost(PostModel postModel);
+  Future<Unit> addPost(PostModel postModel);
 }
 
-const BaseURL = "https://jsonplaceholder.typicode.com";
+const BASE_URL = "https://jsonplaceholder.typicode.com";
 
-class PostRemoteDatasurceImpl implements PostRemoteDatasurce {
+class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   final http.Client client;
 
-  PostRemoteDatasurceImpl(this.client);
+  PostRemoteDataSourceImpl({required this.client});
   @override
-  Future<List<PostModel>> getAllposts() async {
+  Future<List<PostModel>> getAllPosts() async {
     final response = await client.get(
-      Uri.parse(BaseURL + "posts/"),
-      headers: {"content-Type": "application/json"},
+      Uri.parse(BASE_URL + "/posts/"),
+      headers: {"Content-Type": "application/json"},
     );
+
     if (response.statusCode == 200) {
-      final List decodejson = json.decode(response.body) as List;
-      List<PostModel> posts =
-          decodejson.map((post) => PostModel.fromjson(post)).toList();
-      return posts;
+      final List decodedJson = json.decode(response.body) as List;
+      final List<PostModel> postModels = decodedJson
+          .map<PostModel>((jsonPostModel) => PostModel.fromjson(jsonPostModel))
+          .toList();
+
+      return postModels;
     } else {
       throw ServerExcption();
     }
   }
 
   @override
-  Future<Unit> addpost(PostModel postModel) async {
-    final body = {"title": postModel.title, "body": postModel.body};
-    final response = await client.post(
-      Uri.parse(BaseURL + "/posts/"),
-      body: body,
+  Future<Unit> addPost(PostModel postModel) async {
+    final body = {
+      "title": postModel.title,
+      "body": postModel.body,
+    };
+
+    final response =
+        await client.post(Uri.parse(BASE_URL + "/posts/"), body: body);
+
+    if (response.statusCode == 201) {
+      return Future.value(unit);
+    } else {
+      throw ServerExcption(); 
+    }
+  }
+
+  @override
+  Future<Unit> deletePost(int postId) async {
+    final response = await client.delete(
+      Uri.parse(BASE_URL + "/posts/${postId.toString()}"),
+      headers: {"Content-Type": "application/json"},
     );
+
     if (response.statusCode == 200) {
       return Future.value(unit);
     } else {
@@ -49,29 +69,22 @@ class PostRemoteDatasurceImpl implements PostRemoteDatasurce {
   }
 
   @override
-  Future<Unit> deletePost(int postId) async {
-    final response = await client.delete(
-      Uri.parse(BaseURL + "/posts/${postId.toString()}"),
-      headers: {"content-Type": "application/json"},
-    );
-          if(response.statusCode==200){
-            return Future.value(unit);
-          }else{
-            throw ServerExcption();
-          }
-  }
+  Future<Unit> updatePost(PostModel postModel) async {
+    final postId = postModel.id.toString();
+    final body = {
+      "title": postModel.title,
+      "body": postModel.body,
+    };
 
-  @override
-  Future<Unit> updatepost(PostModel postModel)async {
-    final postid=postModel.id;
-    final body = {"title": postModel.title, "body": postModel.body};
-    
-  final response = await client.patch(
-      Uri.parse(BaseURL + "/posts/${postid}"),body: body);
-      if(response.statusCode==200){
-        return Future.value(unit);
-      }else{
-        throw ServerExcption();
-      }
+    final response = await client.patch(
+      Uri.parse(BASE_URL + "/posts/$postId"),
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      return Future.value(unit);
+    } else {
+      throw ServerExcption();
+    }
   }
 }

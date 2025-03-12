@@ -6,7 +6,7 @@ import 'package:flutter_application_1/features/posts/domain/repositoris/posts_re
 class UpdatePostUsecase {
   final PostsRepository postsRepository;
   UpdatePostUsecase(this.postsRepository);
-  Future<Either<Failuers, Unit>> call(Post post) async {
+  Future<Either<Failuers, Unit>> call({required Post post}) async {
     return postsRepository.updatePost(post);
   }
 }

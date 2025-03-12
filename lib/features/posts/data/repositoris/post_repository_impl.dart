@@ -10,7 +10,7 @@ import 'package:flutter_application_1/features/posts/domain/repositoris/posts_re
 
 //here we should talk with local or rmote data surcess
 class PostRepositoryImpl extends PostsRepository {
-  final PostRemoteDatasurce postRemoteDatasurce;
+  final PostRemoteDataSource postRemoteDatasurce;
   final PostLocalDatasurce postLocalDatasurce;
   final NetworkInfo networkInfo;
   PostRepositoryImpl(
@@ -20,9 +20,9 @@ class PostRepositoryImpl extends PostsRepository {
   );
   @override
   Future<Either<Failuers, List<Post>>> getAllposts() async {
-    if (await networkInfo.isconnected) {
+    if (await networkInfo.isConnected) {
       try {
-        final remoteposts = await postRemoteDatasurce.getAllposts();
+        final remoteposts = await postRemoteDatasurce.getAllPosts();
         postLocalDatasurce.cachePosts(remoteposts);
         return right(remoteposts);
       } on ServerExcption {
@@ -43,7 +43,7 @@ class PostRepositoryImpl extends PostsRepository {
     PostModel postModel =PostModel(post.id, post.title, post.body);
         
    return await _Getmessage((){
-    return postRemoteDatasurce.addpost(postModel);
+    return postRemoteDatasurce.addPost(postModel);
    },);
   }
 
@@ -59,11 +59,11 @@ class PostRepositoryImpl extends PostsRepository {
   Future<Either<Failuers, Unit>> updatePost(Post post) async{
     PostModel postModel = PostModel(post.id, post.title, post.body);
    return await _Getmessage((){
-    return postRemoteDatasurce.updatepost(postModel);
+    return postRemoteDatasurce.updatePost(postModel);
    },);
   }
   Future<Either<Failuers, Unit>> _Getmessage(Future<Unit> Function()addddeleteandupdate)async{
-    if(await networkInfo.isconnected){
+    if(await networkInfo.isConnected){
       try{
          addddeleteandupdate;
         return right(unit);

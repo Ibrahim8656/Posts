@@ -5,4 +5,7 @@ sealed class PostsEvent extends Equatable {
 
   @override
   List<Object> get props => [];
+ 
 }
+class GetAllpostsEvent extends PostsEvent{}
+class RefreshPostsEvent extends PostsEvent{}
